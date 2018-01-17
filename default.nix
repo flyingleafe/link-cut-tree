@@ -5,6 +5,7 @@ with import <nixpkgs> {}; {
       cmake
       gcc
       gtest
+      python35
     ];
   };
 }
