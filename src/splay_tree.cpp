@@ -61,11 +61,12 @@ void pushDeltas(SplayNode *x, SplayNode *p, SplayNode *b)
 {
   auto dWx = x->_dW;
   auto dWp = p->_dW;
-  auto dWb = b->_dW;
-
   x->_dW = dWx + dWp;
   p->_dW = -dWx;
-  b->_dW = dWb + dWx;
+
+  if (b != nullptr) {
+    b->_dW += dWx;
+  }
 }
 
 void SplayNode::_rotateLeft()
@@ -191,14 +192,14 @@ void SplayTree::merge(const SplayTree &other)
   }
 
   auto mx = _root;
-  while (_root->_left != nullptr) {
-    mx = _root->_left;
+  while (mx->_right != nullptr) {
+    mx = mx->_right;
   }
 
   splay(mx);
   _root->_right = other._root;
   _root->_right->_parent = _root;
-  _root->_right->_dW = _root->_value - _root->_right->_value;
+  _root->_right->_dW -= _root->_value;
 }
 
 pair<SplayTree, SplayTree> SplayTree::split(const int &key)
@@ -232,15 +233,22 @@ void SplayTree::add(const int &key, const long long &val)
 {
   auto p = split(key);
   if (_root != nullptr && key == _root->_key) {
+    auto vdiff = _root->_value - val;
     if (p.first._root == _root) {
       mkRightChild(_root, p.second._root);
       if (p.second._root != nullptr) {
-        p.second._root->_dW = val - p.second._root->_value;
+        p.second._root->_dW -= val;
+      }
+      if (_root->_left != nullptr) {
+        _root->_left->_dW += vdiff;
       }
     } else {
       mkLeftChild(_root, p.first._root);
       if (p.first._root != nullptr) {
-        p.first._root->_dW = val - p.first._root->_value;
+        p.first._root->_dW -= val;
+      }
+      if (_root->_right != nullptr) {
+        _root->_right->_dW += vdiff;
       }
     }
     _root->_value = _root->_dW = val;
@@ -248,11 +256,11 @@ void SplayTree::add(const int &key, const long long &val)
     auto n = new SplayNode(key, val);
     mkLeftChild(n, p.first._root);
     if (p.first._root != nullptr) {
-      p.first._root->_dW = val - p.first._root->_value;
+      p.first._root->_dW -= val;
     }
     mkRightChild(n, p.second._root);
     if (p.second._root != nullptr) {
-      p.second._root->_dW = val - p.second._root->_value;
+      p.second._root->_dW -= val;
     }
     _root = n;
   }
@@ -271,9 +279,11 @@ void SplayTree::remove(const int &key)
       old->_right->_value = old->_right->_dW = old->_value + old->_right->_dW;
       old->_right->_parent = nullptr;
     }
-    auto l = SplayTree(_root->_left);
-    l.merge(SplayTree(_root->_right));
+    auto l = SplayTree(old->_left);
+    l.merge(SplayTree(old->_right));
     _root = l._root;
+    old->_left = nullptr;
+    old->_right = nullptr;
     delete old;
   }
 }
@@ -291,15 +301,21 @@ void ostream_show(ostream &os, SplayNode *n, bool left, vector<bool> &lvls)
     } else {
       os << ' ';
     }
-    os << "         ";
+    os << "             ";
   }
 
   if (lvls.size() > 0) {
     os << (left ? 'l' : 'r');
-    os << "---------";
+    os << "-------------";
   }
 
-  os << '(' << n->_key << ',' << n->_value << ")\n";
+  os << '(' << n->_key << ',' << n->_value << " (" << n->_dW << ")";
+  if (n->_parent != nullptr) {
+    os << " ^" << n->_parent->_key;
+  } else {
+    os << " ^X";
+  }
+  os << ")\n";
 
   if (n->_left != nullptr) {
     for (size_t i = 0; i < lvls.size(); i++) {
@@ -308,7 +324,7 @@ void ostream_show(ostream &os, SplayNode *n, bool left, vector<bool> &lvls)
       } else {
         os << ' ';
       }
-      os << "         ";
+      os << "             ";
     }
     os << "|\n";
 
@@ -324,7 +340,7 @@ void ostream_show(ostream &os, SplayNode *n, bool left, vector<bool> &lvls)
       } else {
         os << ' ';
       }
-      os << "         ";
+      os << "             ";
     }
     os << "|\n";
 

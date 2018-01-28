@@ -1,11 +1,18 @@
 #include <iostream>
 #include <string>
+#include <cstring>
 #include "headers/splay_tree.h"
 
 using namespace std;
 
 int main(int argc, char *argv[])
 {
+  bool debug = false;
+  if (argc > 1 && strcmp(argv[1], "debug") == 0) {
+    cout << "Debug mode\n";
+    debug = true;
+  }
+
   int n;
   int k;
   long long v;
@@ -29,6 +36,9 @@ int main(int argc, char *argv[])
       } else {
         cout << "None\n";
       }
+    }
+    if (debug) {
+      cout << tree.show() << endl;
     }
   }
 }
