@@ -7,9 +7,10 @@ using namespace std;
 int main(int argc, char *argv[])
 {
   int n;
-  int k, v;
+  int k;
+  long long v;
   string cmd;
-  SplayTree<int, int> tree = {};
+  SplayTree tree = {};
   cin >> n;
   for (int i = 0; i < n; i++) {
     cin >> cmd;
