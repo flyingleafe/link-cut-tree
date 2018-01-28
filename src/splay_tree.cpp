@@ -57,6 +57,20 @@ bool SplayNode::_isRightSon()
   return !_isRoot() && !_isLeftSon();
 }
 
+void updMins(SplayNode *x)
+{
+  if (x == nullptr) return;
+
+  long long dm = 0;
+  if (x->_left != nullptr) {
+    dm = min(dm, x->_left->_dMin + x->_left->_dW);
+  }
+  if (x->_right != nullptr) {
+    dm = min(dm, x->_right->_dMin + x->_right->_dW);
+  }
+  x->_dMin = dm;
+}
+
 void pushDeltas(SplayNode *x, SplayNode *p, SplayNode *b)
 {
   auto dWx = x->_dW;
@@ -89,6 +103,8 @@ void SplayNode::_rotateLeft()
       r->_right = x;
     }
   }
+  updMins(p);
+  updMins(x);
 }
 
 void SplayNode::_rotateRight()
@@ -111,6 +127,8 @@ void SplayNode::_rotateRight()
       r->_right = x;
     }
   }
+  updMins(p);
+  updMins(x);
 }
 
 void SplayNode::splay()
@@ -200,6 +218,7 @@ void SplayTree::merge(const SplayTree &other)
   _root->_right = other._root;
   _root->_right->_parent = _root;
   _root->_right->_dW -= _root->_value;
+  updMins(_root);
 }
 
 pair<SplayTree, SplayTree> SplayTree::split(const int &key)
@@ -217,6 +236,7 @@ pair<SplayTree, SplayTree> SplayTree::split(const int &key)
       auto lv = _root->_dW + l._root->_dW;
       l._root->_value = l._root->_dW = lv;
     }
+    updMins(_root);
     return make_pair(l, *this);
   }
   auto r = SplayTree(_root->_right);
@@ -226,6 +246,7 @@ pair<SplayTree, SplayTree> SplayTree::split(const int &key)
     auto rv = _root->_dW + r._root->_dW;
     r._root->_value = r._root->_dW = rv;
   }
+  updMins(_root);
   return make_pair(*this, r);
 }
 
@@ -252,6 +273,7 @@ void SplayTree::add(const int &key, const long long &val)
       }
     }
     _root->_value = _root->_dW = val;
+    updMins(_root);
   } else {
     auto n = new SplayNode(key, val);
     mkLeftChild(n, p.first._root);
@@ -263,6 +285,7 @@ void SplayTree::add(const int &key, const long long &val)
       p.second._root->_dW -= val;
     }
     _root = n;
+    updMins(_root);
   }
 }
 
@@ -286,6 +309,42 @@ void SplayTree::remove(const int &key)
     old->_right = nullptr;
     delete old;
   }
+}
+
+void SplayTree::increase(const int &key, const long long &val)
+{
+  find(key);
+  if (_root != nullptr) {
+    if (_root->_key <= key) {
+      _root->_dW += val;
+      if (_root->_right != nullptr) {
+        _root->_right->_dW -= val;
+      }
+    } else {
+      if (_root->_left != nullptr) {
+        _root->_left->_dW += val;
+      }
+    }
+  }
+}
+
+maybe<long long> SplayTree::min(const int &key)
+{
+  find(key);
+  if (_root == nullptr) {
+    return {};
+  }
+  if (key >= _root->_key) {
+    long long dm = _root->_value;
+    if (_root->_left != nullptr) {
+      dm = std::min(dm, _root->_left->_dMin + _root->_left->_dW + _root->_dW);
+    }
+    return dm;
+  }
+  if (_root->_left != nullptr) {
+    return _root->_dMin + _root->_left->_dW + _root->_dW;
+  }
+  return {};
 }
 
 void ostream_show(ostream &os, SplayNode *n, bool left, vector<bool> &lvls)

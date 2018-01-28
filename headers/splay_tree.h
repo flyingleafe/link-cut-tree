@@ -34,6 +34,7 @@ struct SplayNode
 
 void mkLeftChild(SplayNode *parent, SplayNode *child);
 void mkRightChild(SplayNode *parent, SplayNode *child);
+void updMins(SplayNode *x);
 void pushDeltas(SplayNode *x, SplayNode *p, SplayNode *b);
 
 //
@@ -52,6 +53,8 @@ struct SplayTree
   std::pair<SplayTree, SplayTree> split(const int &);
   void add(const int &, const long long &);
   void remove(const int &);
+  void increase(const int &, const long long &);
+  maybe<long long> min(const int &);
   std::string show();
 
 private:

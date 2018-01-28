@@ -6,4 +6,6 @@
 template <typename V>
 using maybe = std::experimental::optional<V>;
 
+using nothing = std::experimental::bad_optional_access;
+
 #endif

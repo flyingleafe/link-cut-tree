@@ -6,6 +6,8 @@ with import <nixpkgs> {}; {
       gcc
       gtest
       python35
+      python35Packages.numpy
+      python35Packages.setuptools
     ];
   };
 }

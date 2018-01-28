@@ -30,10 +30,22 @@ int main(int argc, char *argv[])
       tree.remove(k);
     } else if (cmd.compare("find") == 0) {
       cin >> k;
-      int val = tree.find(k).value_or(-1);
-      if (val != -1) {
-        cout << val << endl;
-      } else {
+      auto mval = tree.find(k);
+      try {
+        cout << mval.value() << endl;
+      } catch (const nothing &e) {
+        cout << "None\n";
+      }
+    } else if (cmd.compare("increase") == 0) {
+      cin >> k >> v;
+      tree.increase(k, v);
+      cout << "increased\n";
+    } else if (cmd.compare("min") == 0) {
+      cin >> k;
+      auto mval = tree.min(k);
+      try {
+        cout << mval.value() << endl;
+      } catch (const nothing &e) {
         cout << "None\n";
       }
     }
