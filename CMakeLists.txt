@@ -1,7 +1,13 @@
 cmake_minimum_required(VERSION 3.9.0)
 project(link_cut_tree)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ggdb -std=c++17 -Wwrite-strings")
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+endif()
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wwrite-strings")
+set(CMAKE_CXX_FLAGS_DEBUG "-ggdb")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 set(SOURCES
     src/splay_tree.cpp
