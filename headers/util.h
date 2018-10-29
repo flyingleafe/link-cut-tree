@@ -1,11 +1,11 @@
 #ifndef FLF_UTIL_H
 #define FLF_UTIL_H
 
-#include <experimental/optional>
+#include <optional>
 
 template <typename V>
-using maybe = std::experimental::optional<V>;
+using maybe = std::optional<V>;
 
-using nothing = std::experimental::bad_optional_access;
+using nothing = std::bad_optional_access;
 
 #endif
