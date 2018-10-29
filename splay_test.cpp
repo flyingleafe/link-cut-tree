@@ -1,5 +1,4 @@
-#include <iostream>
-#include <string>
+#include <cstdio>
 #include <cstring>
 #include "headers/splay_tree.h"
 
@@ -9,48 +8,48 @@ int main(int argc, char *argv[])
 {
   bool debug = false;
   if (argc > 1 && strcmp(argv[1], "debug") == 0) {
-    cout << "Debug mode\n";
+    printf("Debug mode\n");
     debug = true;
   }
 
   int n;
   int k;
   long long v;
-  string cmd;
+  char cmd[15];
   SplayTree tree = {};
-  cin >> n;
+  scanf("%d", &n);
   for (int i = 0; i < n; i++) {
-    cin >> cmd;
-    if (cmd.compare("add") == 0) {
-      cin >> k >> v;
+    scanf("%14s", cmd);
+    if (strcmp(cmd, "add") == 0) {
+      scanf("%d %lld", &k, &v);
       tree.add(k, v);
-      cout << "added\n";
-    } else if (cmd.compare("remove") == 0) {
-      cin >> k;
+      printf("added\n");
+    } else if (strcmp(cmd, "remove") == 0) {
+      scanf("%d", &k);
       tree.remove(k);
-    } else if (cmd.compare("find") == 0) {
-      cin >> k;
+    } else if (strcmp(cmd, "find") == 0) {
+      scanf("%d", &k);
       auto mval = tree.find(k);
       try {
-        cout << mval.value() << endl;
+        printf("%lld\n", mval.value());
       } catch (const nothing &e) {
-        cout << "None\n";
+        printf("None\n");
       }
-    } else if (cmd.compare("increase") == 0) {
-      cin >> k >> v;
+    } else if (strcmp(cmd, "increase") == 0) {
+      scanf("%d %lld", &k, &v);
       tree.increase(k, v);
-      cout << "increased\n";
-    } else if (cmd.compare("min") == 0) {
-      cin >> k;
+      printf("increased\n");
+    } else if (strcmp(cmd, "min") == 0) {
+        scanf("%d", &k);
       auto mval = tree.min(k);
       try {
-        cout << mval.value() << endl;
+        printf("%lld\n", mval.value());
       } catch (const nothing &e) {
-        cout << "None\n";
+        printf("None\n");
       }
     }
     if (debug) {
-      cout << tree.show() << endl;
+      printf("%s\n", tree.show().c_str());
     }
   }
 }
