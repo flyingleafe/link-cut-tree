@@ -5,9 +5,9 @@ with import <nixpkgs> {}; {
       cmake
       gcc
       gtest
-      python35
-      python35Packages.numpy
-      python35Packages.setuptools
+      python36
+      python36Packages.numpy
+      python36Packages.setuptools
     ];
   };
 }
