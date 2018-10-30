@@ -1,6 +1,5 @@
 #include <iostream>
 #include <cassert>
-#include <vector>
 #include <sstream>
 #include <utility>
 #include <string>
@@ -49,7 +48,7 @@ long long wMin(SplayNode *x)
 //
 
 SplayNode::SplayNode(const long long &val)
-  : _size(1), _value(val), _dW(val), _dMin(0)
+  : _size(1), _dW(val), _dMin(0)
   , _parent(nullptr), _left(nullptr), _right(nullptr)
 {}
 
@@ -85,54 +84,6 @@ void updSize(SplayNode *x)
   assert(x != nullptr);
   x->_size = size(x->_left) + size(x->_right) + 1;
 }
-
-// void SplayNode::_rotateLeft()
-// {
-//   auto x = this;
-//   auto b = x->_left;
-//   auto p = x->_parent;
-//   auto r = p->_parent;
-//   bool was_left_child = r == nullptr ? false : p->_isLeftSon() ? true : false;
-//   pushDeltas(x, p, b);
-
-//   mkLeftChild(x, p);
-//   mkRightChild(p, b);
-//  x->_parent = r;
-
-//   if (r != nullptr) {
-//     if (was_left_child) {
-//       r->_left = x;
-//     } else {
-//       r->_right = x;
-//     }
-//   }
-//   updMins(p);
-//   updMins(x);
-// }
-
-// void SplayNode::_rotateRight()
-// {
-//   auto x = this;
-//   auto b = x->_right;
-//   auto p = x->_parent;
-//   auto r = p->_parent;
-//   bool was_left_child = r == nullptr ? false : p->_isLeftSon() ? true : false;
-//   pushDeltas(x, p, b);
-
-//   mkRightChild(x, p);
-//   mkLeftChild(p, b);
-//   x->_parent = r;
-
-//   if (r != nullptr) {
-//     if (was_left_child) {
-//       r->_left = x;
-//     } else {
-//       r->_right = x;
-//     }
-//   }
-//   updMins(p);
-//   updMins(x);
-// }
 
 void postRotation(SplayNode *p, SplayNode *x, SplayNode *b)
 {
@@ -199,10 +150,7 @@ void rotateRight(SplayNode *p)
 
 void SplayNode::splay()
 {
-  if (_isRoot()) {
-    _value = _dW;
-    return;
-  }
+  if (_isRoot()) return;
 
   if (_parent->_isRoot()) { // zig
     if (_isLeftSon()) {
@@ -295,7 +243,6 @@ void add(SplayNode *x, const long long &c)
   assert(x != nullptr);
   x->splay();
   x->_dW += c;
-  x->_value = x->_dW;
 
   if (x->_right != nullptr) {
     x->_right->_dW -= c;
@@ -306,7 +253,7 @@ long long min(SplayNode *x)
 {
   assert(x != nullptr);
   x->splay();
-  return min(x->_value, wMin(x->_left) + x->_dW);
+  return min(x->_dW, wMin(x->_left) + x->_dW);
 }
 
 //
@@ -344,7 +291,7 @@ maybe<long long> SplayTree::lookup(const int &k)
   }
   res->splay();
   _root = res;
-  return _root->_value;
+  return _root->_dW;
 }
 
 void SplayTree::increase(const int &k, const long long &v)
@@ -387,7 +334,7 @@ void ostream_show(ostream &os, SplayNode *n, bool left, vector<bool> &lvls)
     os << "-------------";
   }
 
-  os << '(' << n->_size << ", " << n->_value << " (" << n->_dW << ", " << n->_dMin << "))\n";
+  os << '(' << n->_size << " (" << n->_dW << ", " << n->_dMin << "))\n";
 
   if (n->_left != nullptr) {
     for (size_t i = 0; i < lvls.size(); i++) {

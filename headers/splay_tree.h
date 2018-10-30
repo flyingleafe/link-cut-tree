@@ -21,7 +21,6 @@ struct SplayNode
   SplayNode * _right;
 
   int _size;
-  long long _value;
   long long _dW;
   long long _dMin;
 
