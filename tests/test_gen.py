@@ -22,16 +22,15 @@ out = open(fname + '.out', 'w')
 
 sum_add = 0
 
-write_line(inp, n + m)
+write_line(inp, n)
 
-arr = np.full(n+1, 999999, dtype=int)
+arr = np.random.randint(0, INF, size=n, dtype=int)
 
 for i in range(0, n):
-    k, v = (randint(0, n), randint(0, 100))
-    arr[k] = v
     #start = time.time()
-    write_line(inp, "add %d %d" % (k, v))
-    write_line(out, "added")
+    write_line(inp, "%d" % arr[i])
+    # write_line(inp, "add %d %d" % (k, v))
+    # write_line(out, "added")
     #end = time.tim
     #sum_add += end - start
 
@@ -40,24 +39,25 @@ for i in range(0, n):
 #sum_find = 0
 
 def mk_find(k):
-    real_v = arr[k] if arr[k] != INF else None
+    real_v = arr[k]
     write_line(inp, "find %d" % k)
     write_line(out, real_v)
 
 def mk_increase(k, v):
-    inc_map = (arr[0:k] != INF) * v
-    arr[0:k] += inc_map
+    inc_map = np.full(k+1, v)
+    arr[0:k+1] += inc_map
     write_line(inp, "increase %d %d" % (k, v))
     write_line(out, "increased")
 
 def mk_min(k):
-    m = np.min(arr[0:k]) if k > 0 else INF
-    real_m = m if m != INF else None
+    m = np.min(arr[0:k+1])
     write_line(inp, "min %d" % k)
-    write_line(out, real_m)
+    write_line(out, m)
+
+write_line(inp, m)
 
 for i in range(0, m):
-    k = randint(0, n)
+    k = randint(0, n-1)
     #start = time.time()
     if inc_min:
         act = randint(0, 2)

@@ -19,17 +19,19 @@ int main(int argc, char *argv[])
   SplayTree tree = {};
   scanf("%d", &n);
   for (int i = 0; i < n; i++) {
+    scanf("%lld", &v);
+    tree.append(v);
+    if (debug) {
+      printf("%s\n", tree.show().c_str());
+    }
+  }
+
+  scanf("%d", &n);
+  for (int i = 0; i < n; i++) {
     scanf("%14s", cmd);
-    if (strcmp(cmd, "add") == 0) {
-      scanf("%d %lld", &k, &v);
-      tree.add(k, v);
-      printf("added\n");
-    } else if (strcmp(cmd, "remove") == 0) {
+    if (strcmp(cmd, "find") == 0) {
       scanf("%d", &k);
-      tree.remove(k);
-    } else if (strcmp(cmd, "find") == 0) {
-      scanf("%d", &k);
-      auto mval = tree.find(k);
+      auto mval = tree.lookup(k);
       try {
         printf("%lld\n", mval.value());
       } catch (const nothing &e) {
@@ -41,7 +43,7 @@ int main(int argc, char *argv[])
       printf("increased\n");
     } else if (strcmp(cmd, "min") == 0) {
         scanf("%d", &k);
-      auto mval = tree.min(k);
+      auto mval = tree.minimum(k);
       try {
         printf("%lld\n", mval.value());
       } catch (const nothing &e) {

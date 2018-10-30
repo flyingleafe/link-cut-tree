@@ -3,6 +3,7 @@
 
 #include <utility>
 #include <string>
+#include <vector>
 #include "util.h"
 
 //
@@ -11,7 +12,7 @@
 
 struct SplayNode
 {
-  SplayNode(const int &, const long long &);
+  SplayNode(const long long &);
   ~SplayNode();
 
   SplayNode * _parent;
@@ -19,7 +20,7 @@ struct SplayNode
   SplayNode * _left;
   SplayNode * _right;
 
-  int _key;
+  int _size;
   long long _value;
   long long _dW;
   long long _dMin;
@@ -28,14 +29,13 @@ struct SplayNode
   bool _isRoot();
   bool _isLeftSon();
   bool _isRightSon();
-  void _rotateLeft();
-  void _rotateRight();
 };
 
-void mkLeftChild(SplayNode *parent, SplayNode *child);
-void mkRightChild(SplayNode *parent, SplayNode *child);
-void updMins(SplayNode *x);
-void pushDeltas(SplayNode *x, SplayNode *p, SplayNode *b);
+SplayNode * find(SplayNode *x, const int &k);
+SplayNode * merge(SplayNode *a, SplayNode *b);
+void split(SplayNode *x, SplayNode **out_a, SplayNode **out_b);
+void add(SplayNode *x, const long long &c);
+long long min(SplayNode *x);
 
 //
 // Tree struct (a wrapper around pointer to the node)
@@ -44,21 +44,16 @@ void pushDeltas(SplayNode *x, SplayNode *p, SplayNode *b);
 struct SplayTree
 {
   SplayTree();
-  SplayTree(SplayNode *);
-  // ~SplayTree();
+  ~SplayTree();
 
-  void splay(SplayNode *);
-  maybe<long long> find(const int &);
-  void merge(const SplayTree &);
-  std::pair<SplayTree, SplayTree> split(const int &);
-  void add(const int &, const long long &);
-  void remove(const int &);
+  void append(const long long &);
+  maybe<long long> lookup(const int &);
   void increase(const int &, const long long &);
-  maybe<long long> min(const int &);
+  maybe<long long> minimum(const int &);
   std::string show();
 
-private:
   SplayNode * _root;
+  // std::vector<SplayNode> _nodes;
 };
 
 #endif

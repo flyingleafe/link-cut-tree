@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cassert>
 #include <vector>
 #include <sstream>
 #include <utility>
@@ -27,19 +28,35 @@ void mkRightChild(SplayNode *parent, SplayNode *child)
   }
 }
 
-SplayNode::SplayNode(const int &key, const long long &val)
-  : _key(key), _value(val), _dW(val), _dMin(0)
+int size(SplayNode *x)
+{
+  if (x != nullptr) {
+    return x->_size;
+  }
+  return 0;
+}
+
+long long wMin(SplayNode *x)
+{
+  if (x != nullptr) {
+    return x->_dMin + x->_dW;
+  }
+  return 0;
+}
+
+//
+// Splay tree node
+//
+
+SplayNode::SplayNode(const long long &val)
+  : _size(1), _value(val), _dW(val), _dMin(0)
   , _parent(nullptr), _left(nullptr), _right(nullptr)
 {}
 
 SplayNode::~SplayNode()
 {
-  if (_left != nullptr) {
-    delete _left;
-  }
-  if (_right != nullptr) {
-    delete _right;
-  }
+  if (_left != nullptr) delete _left;
+  if (_right != nullptr) delete _right;
 }
 
 bool SplayNode::_isRoot()
@@ -54,81 +71,130 @@ bool SplayNode::_isLeftSon()
 
 bool SplayNode::_isRightSon()
 {
-  return !_isRoot() && !_isLeftSon();
+  return !_isRoot() && _parent->_right == this;
 }
 
 void updMins(SplayNode *x)
 {
-  if (x == nullptr) return;
-
-  long long dm = 0;
-  if (x->_left != nullptr) {
-    dm = min(dm, x->_left->_dMin + x->_left->_dW);
-  }
-  if (x->_right != nullptr) {
-    dm = min(dm, x->_right->_dMin + x->_right->_dW);
-  }
-  x->_dMin = dm;
+  assert(x != nullptr);
+  x->_dMin = min(0ll, min(wMin(x->_left), wMin(x->_right)));
 }
 
-void pushDeltas(SplayNode *x, SplayNode *p, SplayNode *b)
+void updSize(SplayNode *x)
 {
-  auto dWx = x->_dW;
-  auto dWp = p->_dW;
-  x->_dW = dWx + dWp;
+  assert(x != nullptr);
+  x->_size = size(x->_left) + size(x->_right) + 1;
+}
+
+// void SplayNode::_rotateLeft()
+// {
+//   auto x = this;
+//   auto b = x->_left;
+//   auto p = x->_parent;
+//   auto r = p->_parent;
+//   bool was_left_child = r == nullptr ? false : p->_isLeftSon() ? true : false;
+//   pushDeltas(x, p, b);
+
+//   mkLeftChild(x, p);
+//   mkRightChild(p, b);
+//  x->_parent = r;
+
+//   if (r != nullptr) {
+//     if (was_left_child) {
+//       r->_left = x;
+//     } else {
+//       r->_right = x;
+//     }
+//   }
+//   updMins(p);
+//   updMins(x);
+// }
+
+// void SplayNode::_rotateRight()
+// {
+//   auto x = this;
+//   auto b = x->_right;
+//   auto p = x->_parent;
+//   auto r = p->_parent;
+//   bool was_left_child = r == nullptr ? false : p->_isLeftSon() ? true : false;
+//   pushDeltas(x, p, b);
+
+//   mkRightChild(x, p);
+//   mkLeftChild(p, b);
+//   x->_parent = r;
+
+//   if (r != nullptr) {
+//     if (was_left_child) {
+//       r->_left = x;
+//     } else {
+//       r->_right = x;
+//     }
+//   }
+//   updMins(p);
+//   updMins(x);
+// }
+
+void postRotation(SplayNode *p, SplayNode *x, SplayNode *b)
+{
+  long long dWp = p->_dW;
+  long long dWx = x->_dW;
+
+  x->_dW += dWp;
   p->_dW = -dWx;
 
   if (b != nullptr) {
+    b->_parent = p;
     b->_dW += dWx;
   }
+
+  updSize(p);
+  updSize(x);
+  updMins(p);
+  updMins(x);
+
+  auto r = x->_parent;
+  if (r != nullptr) {
+    if (p == r->_left) {
+      r->_left = x;
+    } else {
+      assert(p == r->_right);
+      r->_right = x;
+    }
+  }
 }
 
-void SplayNode::_rotateLeft()
+// Left rotation.
+// Node and its right child should exist.
+void rotateLeft(SplayNode *p)
 {
-  auto x = this;
+  assert(p != nullptr);
+  auto x = p->_right;
+  assert(x != nullptr);
   auto b = x->_left;
-  auto p = x->_parent;
-  auto r = p->_parent;
-  bool was_left_child = r == nullptr ? false : p->_isLeftSon() ? true : false;
-  pushDeltas(x, p, b);
 
-  mkLeftChild(x, p);
-  mkRightChild(p, b);
-  x->_parent = r;
+  x->_left = p;
+  x->_parent = p->_parent;
+  p->_right = b;
+  p->_parent = x;
 
-  if (r != nullptr) {
-    if (was_left_child) {
-      r->_left = x;
-    } else {
-      r->_right = x;
-    }
-  }
-  updMins(p);
-  updMins(x);
+  postRotation(p, x, b);
 }
 
-void SplayNode::_rotateRight()
+// Right rotation.
+// Node and its left child should exist.
+void rotateRight(SplayNode *p)
 {
-  auto x = this;
+  assert(p != nullptr);
+  auto x = p->_left;
+  assert(x != nullptr);
   auto b = x->_right;
-  auto p = x->_parent;
-  auto r = p->_parent;
-  bool was_left_child = r == nullptr ? false : p->_isLeftSon() ? true : false;
-  pushDeltas(x, p, b);
 
-  mkRightChild(x, p);
-  mkLeftChild(p, b);
-  x->_parent = r;
+  x->_right = p;
+  x->_parent = p->_parent;
+  p->_left = b;
+  p->_parent = x;
 
-  if (r != nullptr) {
-    if (was_left_child) {
-      r->_left = x;
-    } else {
-      r->_right = x;
-    }
-  }
-  updMins(p);
-  updMins(x);
+  postRotation(p, x, b);
 }
 
 void SplayNode::splay()
@@ -140,211 +206,164 @@ void SplayNode::splay()
 
   if (_parent->_isRoot()) { // zig
     if (_isLeftSon()) {
-      _rotateRight();
+      rotateRight(_parent);
     } else {
-      _rotateLeft();
+      rotateLeft(_parent);
     }
   } else if (_isLeftSon() == _parent->_isLeftSon()) { // zig-zig
     if (_isLeftSon()) {
-      _parent->_rotateRight();
-      _rotateRight();
+      rotateRight(_parent->_parent);
+      rotateRight(_parent);
     } else {
-      _parent->_rotateLeft();
-      _rotateLeft();
+      rotateLeft(_parent->_parent);
+      rotateLeft(_parent);
     }
   } else { // zig-zag
     if (_isLeftSon()) {
-      _rotateRight();
-      _rotateLeft();
+      rotateRight(_parent);
+      rotateLeft(_parent);
     } else {
-      _rotateLeft();
-      _rotateRight();
+      rotateLeft(_parent);
+      rotateRight(_parent);
     }
   }
 
   splay();
 }
 
+// Just finds the element - without splay!
+// Elements are indexed from 0.
+SplayNode * find(SplayNode *x, const int &k)
+{
+  if (x == nullptr) return nullptr;
+  int l = size(x->_left);
+  if (k < l) {
+    return find(x->_left, k);
+  } else if (k == l) {
+    return x;
+  } else {
+    return find(x->_right, k - l - 1);
+  }
+}
+
+SplayNode * merge(SplayNode *a, SplayNode *b)
+{
+  if (a == nullptr) return b;
+  if (b == nullptr) return a;
+
+  assert(a->_isRoot());
+  assert(b->_isRoot());
+
+  b = find(b, 0);
+  b->splay();
+
+  b->_left = a;
+  a->_parent = b;
+
+  b->_size += a->_size;
+  a->_dW -= b->_dW;
+  b->_dMin = min(b->_dMin, a->_dMin + a->_dW);
+
+  return b;
+}
+
+void split(SplayNode *x, SplayNode **out_a, SplayNode **out_b)
+{
+  if (x == nullptr) {
+    *out_a = nullptr;
+    *out_b = nullptr;
+    return;
+  }
+
+  assert(x->_isRoot());
+
+  x->splay();
+  *out_b = x;
+  auto a = x->_left;
+  *out_a = a;
+  if (a == nullptr) return;
+
+  a->_parent = nullptr;
+  a->_dW += x->_dW;
+  x->_left = nullptr;
+  x->_size -= a->_size;
+  x->_dMin = min(0ll, wMin(x->_right));
+}
+
+void add(SplayNode *x, const long long &c)
+{
+  assert(x != nullptr);
+  x->splay();
+  x->_dW += c;
+  x->_value = x->_dW;
+
+  if (x->_right != nullptr) {
+    x->_right->_dW -= c;
+  }
+}
+
+long long min(SplayNode *x)
+{
+  assert(x != nullptr);
+  x->splay();
+  return min(x->_value, wMin(x->_left) + x->_dW);
+}
+
+//
+// Splay tree
+//
+
 SplayTree::SplayTree()
   : _root(nullptr)
 {}
 
-SplayTree::SplayTree(SplayNode *node)
-  : _root(node)
-{}
-
-void SplayTree::splay(SplayNode *node)
+SplayTree::~SplayTree()
 {
-  node->splay();
-  _root = node;
+  if (_root != nullptr) delete _root;
 }
 
-maybe<long long> SplayTree::find(const int &key)
+void SplayTree::append(const long long &v)
 {
-  auto cur = _root;
-  SplayNode *prev = nullptr;
-  while (cur != nullptr) {
-    if (cur->_key == key) {
-      splay(cur);
-      return cur->_value;
-    } else if (key < cur->_key) {
-      prev = cur;
-      cur = cur->_left;
-    } else {
-      prev = cur;
-      cur = cur->_right;
-    }
-  }
+  auto n = new SplayNode(v);
+  _root = merge(_root, n);
 
-  if (prev != nullptr) {
-    splay(prev);
-  }
-  return {};
-}
-
-void SplayTree::merge(const SplayTree &other)
-{
-  if (_root == nullptr) {
-    _root = other._root;
-    return;
-  }
-
-  auto mx = _root;
-  while (mx->_right != nullptr) {
-    mx = mx->_right;
-  }
-
-  splay(mx);
-  _root->_right = other._root;
-  _root->_right->_parent = _root;
-  _root->_right->_dW -= _root->_value;
-  updMins(_root);
-}
-
-pair<SplayTree, SplayTree> SplayTree::split(const int &key)
-{
-  if (_root == nullptr) {
-    return make_pair(SplayTree(), SplayTree());
-  }
-
-  find(key);
-  if (key < _root->_key) {
-    auto l = SplayTree(_root->_left);
-    _root->_left = nullptr;
-    if (l._root != nullptr) {
-      l._root->_parent = nullptr;
-      auto lv = _root->_dW + l._root->_dW;
-      l._root->_value = l._root->_dW = lv;
-    }
-    updMins(_root);
-    return make_pair(l, *this);
-  }
-  auto r = SplayTree(_root->_right);
-  _root->_right = nullptr;
-  if (r._root != nullptr) {
-    r._root->_parent = nullptr;
-    auto rv = _root->_dW + r._root->_dW;
-    r._root->_value = r._root->_dW = rv;
-  }
-  updMins(_root);
-  return make_pair(*this, r);
-}
-
-void SplayTree::add(const int &key, const long long &val)
-{
-  auto p = split(key);
-  if (_root != nullptr && key == _root->_key) {
-    auto vdiff = _root->_value - val;
-    if (p.first._root == _root) {
-      mkRightChild(_root, p.second._root);
-      if (p.second._root != nullptr) {
-        p.second._root->_dW -= val;
-      }
-      if (_root->_left != nullptr) {
-        _root->_left->_dW += vdiff;
-      }
-    } else {
-      mkLeftChild(_root, p.first._root);
-      if (p.first._root != nullptr) {
-        p.first._root->_dW -= val;
-      }
-      if (_root->_right != nullptr) {
-        _root->_right->_dW += vdiff;
-      }
-    }
-    _root->_value = _root->_dW = val;
-    updMins(_root);
+  // avoiding bamboos
+  if (_root->_size % 2 == 0) {
+    _root = find(_root, 0);
   } else {
-    auto n = new SplayNode(key, val);
-    mkLeftChild(n, p.first._root);
-    if (p.first._root != nullptr) {
-      p.first._root->_dW -= val;
-    }
-    mkRightChild(n, p.second._root);
-    if (p.second._root != nullptr) {
-      p.second._root->_dW -= val;
-    }
-    _root = n;
-    updMins(_root);
+    _root = find(_root, _root->_size-1);
   }
+  _root->splay();
 }
 
-void SplayTree::remove(const int &key)
+maybe<long long> SplayTree::lookup(const int &k)
 {
-  find(key);
-  if (_root != nullptr && key == _root->_key) {
-    auto old = _root;
-    if (old->_left != nullptr) {
-      old->_left->_value = old->_left->_dW = old->_value + old->_left->_dW;
-      old->_left->_parent = nullptr;
-    }
-    if (old->_right != nullptr) {
-      old->_right->_value = old->_right->_dW = old->_value + old->_right->_dW;
-      old->_right->_parent = nullptr;
-    }
-    auto l = SplayTree(old->_left);
-    l.merge(SplayTree(old->_right));
-    _root = l._root;
-    old->_left = nullptr;
-    old->_right = nullptr;
-    delete old;
-  }
-}
-
-void SplayTree::increase(const int &key, const long long &val)
-{
-  find(key);
-  if (_root != nullptr) {
-    if (_root->_key <= key) {
-      _root->_dW += val;
-      if (_root->_right != nullptr) {
-        _root->_right->_dW -= val;
-      }
-    } else {
-      if (_root->_left != nullptr) {
-        _root->_left->_dW += val;
-      }
-    }
-  }
-}
-
-maybe<long long> SplayTree::min(const int &key)
-{
-  find(key);
-  if (_root == nullptr) {
+  auto res = find(_root, k);
+  if (res == nullptr) {
     return {};
   }
-  if (key >= _root->_key) {
-    long long dm = _root->_value;
-    if (_root->_left != nullptr) {
-      dm = std::min(dm, _root->_left->_dMin + _root->_left->_dW + _root->_dW);
-    }
-    return dm;
+  res->splay();
+  _root = res;
+  return _root->_value;
+}
+
+void SplayTree::increase(const int &k, const long long &v)
+{
+  auto res = find(_root, k);
+  if (res == nullptr) return;
+
+  add(res, v);
+  _root = res;
+}
+
+maybe<long long> SplayTree::minimum(const int &k)
+{
+  auto res = find(_root, k);
+  if (res == nullptr) {
+    return {};
   }
-  if (_root->_left != nullptr) {
-    return _root->_dMin + _root->_left->_dW + _root->_dW;
-  }
-  return {};
+  _root = res;
+  return min(_root);
 }
 
 void ostream_show(ostream &os, SplayNode *n, bool left, vector<bool> &lvls)
@@ -368,13 +387,7 @@ void ostream_show(ostream &os, SplayNode *n, bool left, vector<bool> &lvls)
     os << "-------------";
   }
 
-  os << '(' << n->_key << ',' << n->_value << " (" << n->_dW << ")";
-  if (n->_parent != nullptr) {
-    os << " ^" << n->_parent->_key;
-  } else {
-    os << " ^X";
-  }
-  os << ")\n";
+  os << '(' << n->_size << ", " << n->_value << " (" << n->_dW << ", " << n->_dMin << "))\n";
 
   if (n->_left != nullptr) {
     for (size_t i = 0; i < lvls.size(); i++) {
