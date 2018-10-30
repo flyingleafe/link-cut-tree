@@ -10,8 +10,8 @@ set(CMAKE_CXX_FLAGS_DEBUG "-ggdb")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 set(SOURCES
+    src/splay_node.cpp
     src/splay_tree.cpp
     src/link_cut_tree.cpp)
 
-# add_executable(libtcpflf ${SOURCE_FILES_TCP})
 add_executable(splay_test splay_test.cpp ${SOURCES})
