@@ -1,6 +1,7 @@
 #ifndef FLF_SPLAY_NODE_H
 #define FLF_SPLAY_NODE_H
 
+#include <utility>
 #include <cstdlib>
 
 //
@@ -34,7 +35,7 @@ void updSize(SplayNode *x);
 
 SplayNode * find(SplayNode *x, size_t k);
 SplayNode * merge(SplayNode *a, SplayNode *b);
-void split(SplayNode *x, SplayNode **out_a, SplayNode **out_b);
+std::pair<SplayNode *, SplayNode *> split(SplayNode *x, bool root_to_left = false);
 void add(SplayNode *x, const long long &c);
 long long min(SplayNode *x);
 

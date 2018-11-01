@@ -220,26 +220,32 @@ SplayNode * merge(SplayNode *a, SplayNode *b)
   return b;
 }
 
-// Splits a tree by node. Node itself goes to the left part.
-void split(SplayNode *x, SplayNode **out_a, SplayNode **out_b)
+// Splits a tree by node.
+// Node itself goes to the right by default and to the left if the flag is passed.
+pair<SplayNode *, SplayNode *> split(SplayNode *x, bool root_to_left)
 {
   if (x == nullptr) {
-    *out_a = nullptr;
-    *out_b = nullptr;
-    return;
+    return make_pair(nullptr, nullptr);
   }
 
   x->splay();
-  *out_a = x;
-  auto a = x->_right;
-  *out_b = a;
-  if (a == nullptr) return;
+  auto a = root_to_left? x->_right : x->_left;
 
-  a->_parent = nullptr;
-  a->_dW += x->_dW;
-  x->_right = nullptr;
-  x->_size -= a->_size;
-  x->_dMin = min(0ll, wMin(x->_left));
+  if (a != nullptr) {
+    a->_parent = nullptr;
+    a->_dW += x->_dW;
+
+    if (root_to_left) {
+      x->_right = nullptr;
+    } else {
+      x->_left = nullptr;
+    }
+
+    updSize(x);
+    updMins(x);
+  }
+
+  return make_pair(x, a);
 }
 
 void add(SplayNode *x, const long long &c)
