@@ -4,7 +4,7 @@
 
 using namespace std;
 
-int size(SplayNode *x)
+size_t size(SplayNode *x)
 {
   if (x != nullptr) {
     return x->_size;
@@ -24,13 +24,9 @@ long long wMin(SplayNode *x)
 // Splay tree node
 //
 
-SplayNode::SplayNode(const long long &val)
-  : _size(1), _dW(val), _dMin(0)
+SplayNode::SplayNode(int id, const long long &val)
+  : id(id), _size(1), _dW(val), _dMin(0)
   , _parent(nullptr), _left(nullptr), _right(nullptr)
-{}
-
-SplayNode::SplayNode()
-  : SplayNode(0)
 {}
 
 SplayNode::~SplayNode()
@@ -82,6 +78,8 @@ void postRotation(SplayNode *p, SplayNode *x, SplayNode *b)
     b->_parent = p;
     b->_dW += dWx;
   }
+
+  swap(x->_pathparent, p->_pathparent);
 
   updSize(p);
   updSize(x);
@@ -184,10 +182,10 @@ void SplayNode::splay()
 
 // Just finds the element - without splay!
 // Elements are indexed from 0.
-SplayNode * find(SplayNode *x, int k)
+SplayNode * find(SplayNode *x, size_t k)
 {
   while (x != nullptr) {
-    int l = size(x->_left);
+    size_t l = size(x->_left);
     if (k < l) {
       x = x->_left;
     } else if (k == l) {
@@ -222,6 +220,7 @@ SplayNode * merge(SplayNode *a, SplayNode *b)
   return b;
 }
 
+// Splits a tree by node. Node itself goes to the left part.
 void split(SplayNode *x, SplayNode **out_a, SplayNode **out_b)
 {
   if (x == nullptr) {
@@ -230,19 +229,17 @@ void split(SplayNode *x, SplayNode **out_a, SplayNode **out_b)
     return;
   }
 
-  assert(x->_isRoot());
-
   x->splay();
-  *out_b = x;
-  auto a = x->_left;
-  *out_a = a;
+  *out_a = x;
+  auto a = x->_right;
+  *out_b = a;
   if (a == nullptr) return;
 
   a->_parent = nullptr;
   a->_dW += x->_dW;
-  x->_left = nullptr;
+  x->_right = nullptr;
   x->_size -= a->_size;
-  x->_dMin = min(0ll, wMin(x->_right));
+  x->_dMin = min(0ll, wMin(x->_left));
 }
 
 void add(SplayNode *x, const long long &c)

@@ -24,12 +24,12 @@ SplayTree::~SplayTree()
 
 void SplayTree::append(const long long &v)
 {
-  auto n = _alloc.alloc();
-  n->_dW = v;
+  int id = (int) size(_root);
+  auto n = _alloc.alloc(id, v);
   _root = merge(_root, n);
 
   // avoiding bamboos
-  int l = _root->_size / 2;
+  size_t l = _root->_size / 2;
   _root = find(_root, l);
   _root->splay();
 }
