@@ -43,10 +43,10 @@ def mk_find(k):
     write_line(inp, "find %d" % k)
     write_line(out, real_v)
 
-def mk_increase(k, v):
-    inc_map = np.full(k+1, v)
-    arr[0:k+1] += inc_map
-    write_line(inp, "increase %d %d" % (k, v))
+def mk_increase(a, b, v):
+    inc_map = np.full((b - a)+1, v)
+    arr[a:b+1] += inc_map
+    write_line(inp, "increase %d %d %d" % (a, b, v))
     write_line(out, "increased")
 
 def mk_min(k):
@@ -64,8 +64,9 @@ for i in range(0, m):
         if act == 0:
             mk_find(k)
         elif act == 1:
+            a = randint(0, k)
             v = randint(-10, 10)
-            mk_increase(k, v)
+            mk_increase(a, k, v)
         elif act == 2:
             mk_min(k)
     else:

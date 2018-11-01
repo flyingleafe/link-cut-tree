@@ -91,3 +91,15 @@ void LinkCutTree::cut(int node_id)
   expose(u);
   split(u);
 }
+
+int LinkCutTree::lca(int fst, int snd)
+{
+  auto u = _nodes[fst];
+  auto v = _nodes[snd];
+  expose(u);
+  expose(v);
+  u->splay();
+  auto p = u->_pathparent;
+  assert(p != nullptr);
+  return p->id;
+}

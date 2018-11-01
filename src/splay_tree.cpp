@@ -45,13 +45,29 @@ maybe<long long> SplayTree::lookup(const int &k)
   return _root->_dW;
 }
 
-void SplayTree::increase(const int &k, const long long &v)
+void SplayTree::increase(int from, int to, const long long &v)
 {
-  auto res = find(_root, k);
-  if (res == nullptr) return;
+  assert(from <= to);
+  if (_root == nullptr) return;
 
-  add(res, v);
-  _root = res;
+  from = max(from, 0);
+  to = min(to, (int) _root->_size - 1);
+
+  if (from == 0) {
+    auto res = find(_root, to);
+    assert(res != nullptr);
+
+    add(res, v);
+    _root = res;
+  } else {
+    auto pivot = find(_root, from);
+    assert(pivot != nullptr);
+
+    auto pair = split(pivot);
+    auto res = find(pair.second, to - from);
+    add(res, v);
+    _root = merge(pair.first, res);
+  }
 }
 
 maybe<long long> SplayTree::minimum(const int &k)

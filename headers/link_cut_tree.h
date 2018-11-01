@@ -16,7 +16,7 @@ struct LinkCutTree
   maybe<long long> minLC(int node_id);
   void link(int parent, int child);
   void cut(int node_id);
-  int lca(int u, int v);
+  int lca(int fst, int snd);
 
 private:
   std::vector<SplayNode *> _nodes;

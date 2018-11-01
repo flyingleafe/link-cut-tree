@@ -245,7 +245,7 @@ pair<SplayNode *, SplayNode *> split(SplayNode *x, bool root_to_left)
     updMins(x);
   }
 
-  return make_pair(x, a);
+  return root_to_left ? make_pair(x, a) : make_pair(a, x);
 }
 
 void add(SplayNode *x, const long long &c)

@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
   }
 
   int n;
-  int k;
+  int k, from, to;
   long long v;
   char cmd[15];
   SplayTree tree = {};
@@ -38,8 +38,8 @@ int main(int argc, char *argv[])
         printf("None\n");
       }
     } else if (strcmp(cmd, "increase") == 0) {
-      scanf("%d %lld", &k, &v);
-      tree.increase(k, v);
+      scanf("%d %d %lld", &from, &to, &v);
+      tree.increase(from, to, v);
       printf("increased\n");
     } else if (strcmp(cmd, "min") == 0) {
         scanf("%d", &k);

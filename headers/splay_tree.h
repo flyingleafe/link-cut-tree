@@ -17,7 +17,7 @@ struct SplayTree
 
   void append(const long long &);
   maybe<long long> lookup(const int &);
-  void increase(const int &, const long long &);
+  void increase(int, int, const long long &);
   maybe<long long> minimum(const int &);
   std::string show();
 
