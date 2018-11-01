@@ -15,3 +15,4 @@ set(SOURCES
     src/link_cut_tree.cpp)
 
 add_executable(splay_test splay_test.cpp ${SOURCES})
+add_executable(link_cut_test link_cut_test.cpp ${SOURCES})

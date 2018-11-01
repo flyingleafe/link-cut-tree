@@ -12,11 +12,12 @@ struct LinkCutTree
   ~LinkCutTree();
 
   int newNode(const long long &v);
+  maybe<long long> get(int node_id);
   void addLC(int node_id, const long long &c);
   maybe<long long> minLC(int node_id);
   void link(int parent, int child);
   void cut(int node_id);
-  int lca(int fst, int snd);
+  maybe<int> lca(int fst, int snd);
 
 private:
   std::vector<SplayNode *> _nodes;

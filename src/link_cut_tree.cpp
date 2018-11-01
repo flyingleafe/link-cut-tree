@@ -59,6 +59,17 @@ int LinkCutTree::newNode(const long long &v)
   return id;
 }
 
+maybe<long long> LinkCutTree::get(int node_id)
+{
+  if (node_id < 0 || node_id >= _nodes.size()) {
+    return {};
+  }
+
+  auto v = _nodes[node_id];
+  v->splay();
+  return v->_dW;
+}
+
 void LinkCutTree::addLC(int node_id, const long long &c)
 {
   auto u = _nodes[node_id];
@@ -75,6 +86,7 @@ maybe<long long> LinkCutTree::minLC(int node_id)
 
 void LinkCutTree::link(int parent, int child)
 {
+  if (parent == child) return;
   auto u = _nodes[parent];
   auto v = _nodes[child];
 
@@ -92,14 +104,17 @@ void LinkCutTree::cut(int node_id)
   split(u);
 }
 
-int LinkCutTree::lca(int fst, int snd)
+maybe<int> LinkCutTree::lca(int fst, int snd)
 {
   auto u = _nodes[fst];
   auto v = _nodes[snd];
   expose(u);
   expose(v);
   u->splay();
+
   auto p = u->_pathparent;
-  assert(p != nullptr);
-  return p->id;
+  if (p != nullptr) {
+    return p->id;
+  }
+  return {};
 }
